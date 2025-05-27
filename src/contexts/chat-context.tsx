@@ -659,9 +659,8 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
         aggregatedStats,
         crossCheckResult,
         autoCheck,
-        aiDirectCall
+        aiDirectCall,
         setCrossCheckResult,
-        autoCheck,
         agentContext,
         setAgentContext,
         startAgent,
