@@ -3,6 +3,7 @@ import { CreateMessage, Message } from 'ai/react';
 import { nanoid } from 'nanoid';
 import { createOpenAI, openai } from '@ai-sdk/openai';
 import { ollama, createOllama } from 'ollama-ai-provider';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { CallWarning, convertToCoreMessages, FinishReason, streamText } from 'ai';
 import { ConfigContext } from '@/contexts/config-context';
 import { toast } from 'sonner';
@@ -293,7 +294,13 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
             providerName = await config?.getServerConfig('llmProviderChat') as string;
         }
 
+        if (!modelName) {
+            modelName = await config?.getServerConfig('llmModelChat') as string;
+        }
+
         setProviderName(providerName);
+
+        console.log('AI Provider: ', providerName, modelName);
 
         if (providerName === 'ollama') {
             let ollamaBaseUrl = await config?.getServerConfig('ollamaUrl') as string;
@@ -319,6 +326,11 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
                 apiKey: await config?.getServerConfig('chatGptApiKey') as string
             })
             return aiProvider.chat(modelName ? modelName : 'chatgpt-4o-latest')   //gpt-4o-2024-05-13
+        } else if (providerName === 'gemini') {
+            const aiProvider = createGoogleGenerativeAI({                
+                apiKey: await config?.getServerConfig('geminiApiKey') as string
+            })
+            return aiProvider.chat(modelName ? modelName : 'gemini-2.5-pro-preview-05-06')
         } else {
             toast.error('Unknown AI provider ' + providerName);
             throw new Error('Unknown AI provider ' + providerName);

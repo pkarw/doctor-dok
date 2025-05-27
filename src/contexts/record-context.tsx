@@ -16,6 +16,7 @@ import { pdfjs } from 'react-pdf'
 import { prompts } from "@/data/ai/prompts";
 import { parse as chatgptParseRecord } from '@/ocr/ocr-chatgpt-provider';
 import { parse as tesseractParseRecord } from '@/ocr/ocr-tesseract-provider';
+import { parse as geminiParseRecord } from '@/ocr/ocr-gemini-provider';
 import { FolderContext } from './folder-context';
 import { findCodeBlocks, getCurrentTS, getErrorMessage, getTS } from '@/lib/utils';
 import { parse } from 'path';
@@ -420,7 +421,7 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
               if (statusUpdates) toast.info('Downloading file ' + ea.displayName);
               const pdfBase64Content = await getAttachmentData(ea.toDTO(), AttachmentFormat.dataUrl) as string; // convert to images otherwise it's not supported by vercel ai sdk
               if (statusUpdates) toast.info('Converting file  ' + ea.displayName + ' to images ...');
-              const imagesArray = await convert(pdfBase64Content, { base64: true }, pdfjs)
+              const imagesArray = await convert(pdfBase64Content, { base64: true, scale: process.env.NEXT_PUBLIC_PDF_SCALE ? parseFloat(process.env.NEXT_PUBLIC_PDF_SCALE) : 1.5 }, pdfjs)
               if (statusUpdates) toast.info('File converted to ' + imagesArray.length + ' images');  
               for (let i = 0; i < imagesArray.length; i++){
                 attachments.push({
@@ -505,6 +506,8 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
                 await chatgptParseRecord(record, chatContext, config, folderContext, updateRecordFromText, updateParseProgress, attachments);
               } else if (ocrProvider === 'tesseract') {
                 await tesseractParseRecord(record, chatContext, config, folderContext, updateRecordFromText, updateParseProgress, attachments);
+              } else if (ocrProvider === 'gemini') {
+                await geminiParseRecord(record, chatContext, config, folderContext, updateRecordFromText, updateParseProgress, attachments);
               }
               console.log('Record parsed, taking next record', record);
               parseQueue = parseQueue.slice(1); // remove one item
