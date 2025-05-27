@@ -33,6 +33,7 @@ export const ENV_PROVIDED_CONFIG: Record<string, any> = {
   llmProviderChat: process.env.NEXT_PUBLIC_LLM_PROVIDER_CHAT,
   llmModelChat: process.env.NEXT_PUBLIC_LLM_MODEL_CHAT,
   llmProviderParse: process.env.NEXT_PUBLIC_LLM_PROVIDER_PARSE,
+  llmModelParse: process.env.NEXT_PUBLIC_LLM_MODEL_PARSE,
   llmProviderRemovePII: process.env.NEXT_PUBLIC_LLM_PROVIDER_REMOVE_PII,
   piiGeneralData: process.env.NEXT_PUBLIC_PII_GENERAL_DATA,
   autoLoadFolderContext: process.env.NEXT_PUBLIC_AUTO_LOAD_PATIENT_CONTEXT,

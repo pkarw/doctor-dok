@@ -303,6 +303,7 @@ export function SettingsPopup() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem key="chatgpt" value="chatgpt">Cloud: Chat GPT</SelectItem>
+                            <SelectItem key="gemini" value="gemini">Cloud: Gemini</SelectItem>
                             <SelectItem key="ollama" value="ollama">Local: Ollama</SelectItem>
                           </SelectContent>
                         </Select>
@@ -315,6 +316,7 @@ export function SettingsPopup() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem key="chatgpt" value="chatgpt">Cloud: Chat GPT</SelectItem>
+                            <SelectItem key="gemini" value="gemini">Cloud: Gemini</SelectItem>
                             <SelectItem key="ollama" value="ollama">Local: Ollama</SelectItem>
                           </SelectContent>
                         </Select>
