@@ -166,9 +166,9 @@ export const ChatContext = createContext<ChatContextType>({
     stopAgent: () => {},
     crosscheckAnswers: true,
     setCrosscheckAnswers: (value: boolean) => {},
-    crosscheckModel: 'llama3.1:latest',
+    crosscheckModel: 'chatgpt-4o-latest',
     setCrosscheckModel: (value: string) => {},
-    crosscheckProvider: 'ollama',
+    crosscheckProvider: 'chatgpt',
     setCrosscheckProvider: (value: string) => {},
     crossCheckResult: null,
     setCrossCheckResult: (value: CrossCheckResultType | null) => {},
@@ -219,8 +219,8 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
     const [isCrossChecking, setIsCrossChecking] = useState(false);
     const [crossCheckResult, setCrossCheckResult] = useState<CrossCheckResultType | null>(null);
     const [crosscheckAnswers, setCrosscheckAnswers] = useState(process.env.NEXT_PUBLIC_CHAT_CROSSCHECK_DISABLE ? false : true);
-    const [crosscheckModel, setCrosscheckModel] = useState('llama3.1:latest');
-    const [crosscheckProvider, setCrosscheckProvider] = useState('ollama');
+    const [crosscheckModel, setCrosscheckModel] = useState('chatgpt-4o-latest');
+    const [crosscheckProvider, setCrosscheckProvider] = useState('chatgpt');
 
     const [areRecordsLoaded, setRecordsLoaded] = useState(false);
     const [chatCustomPromptVisible, setChatCustomPromptVisible] = useState(false);
