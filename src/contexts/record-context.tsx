@@ -16,6 +16,7 @@ import { pdfjs } from 'react-pdf'
 import { prompts } from "@/data/ai/prompts";
 import { parse as chatgptParseRecord } from '@/ocr/ocr-chatgpt-provider';
 import { parse as tesseractParseRecord } from '@/ocr/ocr-tesseract-provider';
+import { parse as geminiParseRecord } from '@/ocr/ocr-gemini-provider';
 import { FolderContext } from './folder-context';
 import { findCodeBlocks, getCurrentTS, getErrorMessage, getTS } from '@/lib/utils';
 import { parse } from 'path';
@@ -505,6 +506,8 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
                 await chatgptParseRecord(record, chatContext, config, folderContext, updateRecordFromText, updateParseProgress, attachments);
               } else if (ocrProvider === 'tesseract') {
                 await tesseractParseRecord(record, chatContext, config, folderContext, updateRecordFromText, updateParseProgress, attachments);
+              } else if (ocrProvider === 'gemini') {
+                await geminiParseRecord(record, chatContext, config, folderContext, updateRecordFromText, updateParseProgress, attachments);
               }
               console.log('Record parsed, taking next record', record);
               parseQueue = parseQueue.slice(1); // remove one item

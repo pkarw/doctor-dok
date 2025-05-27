@@ -24,6 +24,7 @@ export function coercedVal(val: any, defaultVal: any = ''): ConfigSupportedValue
 
 export const ENV_PROVIDED_CONFIG: Record<string, any> = {
   chatGptApiKey: process.env.NEXT_PUBLIC_CHAT_GPT_API_KEY,
+  geminiApiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
   displayAttachmentPreviews: process.env.NEXT_PUBLIC_DISPLAY_ATTACHMENT_PREVIEWS,
   ocrProvider: process.env.NEXT_PUBLIC_OCR_PROVIDER,
   ocrLanguage: process.env.NEXT_PUBLIC_OCR_LANGUAGE,
