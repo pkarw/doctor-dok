@@ -60,6 +60,11 @@ export const prompts = {
     }, // [ { type: "blood_results", subtype: "morphology", findings: [], ... }, {type: "mri", subtype: "head mri", ...}]
 
 
+    generateRecordMetaData: (context: PromptContext, text: string) => {
+        return 'Generate meta data for the record: ' + text + '. Return JSON with written in original language in the following schema: \
+                ' + JSON.stringify(itemSchema) + '```\r\n\r\n'        
+    },
+
     recordRemovePII: (context: PromptContext, ocrText: string) => {
         return 'Please remove Personal Data (names, first names, last names, company names, emails, id numbers, phone numbers, addresses), fix language errors and format markdown from the text ' + ocrText
     },

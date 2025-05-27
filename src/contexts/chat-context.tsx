@@ -130,6 +130,7 @@ export type ChatContextType = {
     agentContext: AgentContext | null;
     setAgentContext: (value: AgentContext) => void;
     setRecordsLoaded: (value: boolean) => void;
+    aiDirectCall: (messages: MessageEx[], onResult?: OnResultCallback, providerName?: string, modelName?: string) => void;
     sendMessage: (msg: CreateMessageEnvelope, includeExistingMessagesAsContext?: boolean) => void;
     sendMessages: (msg: CreateMessagesEnvelope, includeExistingMessagesAsContext?: boolean) => void;
     autoCheck: (messages: MessageEx[], providerName?: string, modelName?: string) => void;
@@ -175,6 +176,7 @@ export const ChatContext = createContext<ChatContextType>({
     agentContext: null,
     setAgentContext: (value: AgentContext) => {},
     setRecordsLoaded: (value: boolean) => {},
+    aiDirectCall: (messages: MessageEx[], onResult?: OnResultCallback, providerName?: string, modelName?: string) => {},
     autoCheck: (messages: MessageEx[], providerName?, modelName?: string) => {},
     sendMessage: (msg: CreateMessageEnvelope, includeExistingMessagesAsContext: boolean = true) => {},
     sendMessages: (msg: CreateMessagesEnvelope, includeExistingMessagesAsContext: boolean = true) => {},
@@ -656,6 +658,8 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
         lastRequestStat,
         aggregatedStats,
         crossCheckResult,
+        autoCheck,
+        aiDirectCall
         setCrossCheckResult,
         autoCheck,
         agentContext,

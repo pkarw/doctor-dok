@@ -10,8 +10,9 @@ import showdown from 'showdown'
 
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { Button } from '@/components/ui/button';
-import { DownloadIcon, SaveIcon } from 'lucide-react';
+import { DownloadIcon, SaveIcon, Loader2 } from 'lucide-react';
 import { RecordContext } from '@/contexts/record-context';
+import { DataLoadingStatus } from '@/data/client/models';
 import { removeCodeBlocks } from '@/lib/utils';
 import DataLoader from './data-loader';
 import { QuestionMarkCircledIcon, QuestionMarkIcon } from '@radix-ui/react-icons';
@@ -47,7 +48,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, ref }) => {
                               const match = /language-(\w+)/.exec(className || '')
                               return match ? (
                                 <SyntaxHighlighter
-                                  {...rest}
                                   PreTag="div"
                                   wrapLines={true}
                                   wrapLongLines={true}
@@ -55,7 +55,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, ref }) => {
                                   theme={shTheme}
                                 >{String(children).replace(/\n$/, '')}</SyntaxHighlighter>
                               ) : (
-                                <code {...rest} className={className}>
+                                <code className={className}>
                                   {children}
                                 </code>
                               )
@@ -77,7 +77,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, ref }) => {
                               const match = /language-(\w+)/.exec(className || '')
                               return match ? (
                                 <SyntaxHighlighter
-                                  {...rest}
                                   PreTag="div"
                                   wrapLines={true}
                                   wrapLongLines={true}
@@ -85,7 +84,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, ref }) => {
                                   theme={shTheme}
                                 >{String(children).replace(/\n$/, '')}</SyntaxHighlighter>
                               ) : (
-                                <code {...rest} className={className}>
+                                <code className={className}>
                                   {children}
                                 </code>
                               )
@@ -108,9 +107,20 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, ref }) => {
             ))))))}
             {message.role !== 'user'  && message.finished && !message.recordSaved ? (
               <div className="flex-wrap flex items-center justify-left">
-                <Button title="Save message as new record" variant="ghost" size="icon" onClick={() => {
-                  recordContext?.updateRecordFromText(message.content, message.recordRef ?? null, true);
-                }}><SaveIcon /></Button>
+                <Button title="Save message as new record" variant="ghost" size="icon" onClick={async () => {
+                  try {
+                    recordContext?.setOperationStatus(DataLoadingStatus.Loading);
+                    await recordContext?.updateRecordFromText(message.content, message.recordRef ?? null, true);
+                  } finally {
+                    recordContext?.setOperationStatus(DataLoadingStatus.Success);
+                  }
+                }} disabled={recordContext?.operationStatus === DataLoadingStatus.Loading}>
+                  {recordContext?.operationStatus === DataLoadingStatus.Loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <SaveIcon />
+                  )}
+                </Button>
                 <Button title="Save message as new record" variant="ghost" size="icon" onClick={() => {
                   chatContext.downloadMessage(message, `report-${message.id}`, 'html');
                 }}><DownloadIcon /></Button>
