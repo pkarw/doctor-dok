@@ -78,7 +78,10 @@ export function Chat() {
     async function loadConfig() {
       setDefaultChatProvider(await config?.getServerConfig('llmProviderChat') as string);
       setLlmProvider(await config?.getServerConfig('llmProviderChat') as string);
-      setLlmModel(await config?.getServerConfig('llmModelChat') as string ?? 'chatgpt-4o-latest');
+      if (!llmModel) {  
+        setLlmModel(await config?.getServerConfig('llmModelChat') as string ?? 'chatgpt-4o-latest');
+      }
+
       const configOllamaUrl = await config?.getServerConfig('ollamaUrl') as string
       setOllamaUrl(configOllamaUrl);
       setShowProviders(process.env.NEXT_PUBLIC_CHAT_PROVIDER_SELECT !== "" && (configOllamaUrl !== null && typeof configOllamaUrl === 'string' && configOllamaUrl.startsWith('http')));
