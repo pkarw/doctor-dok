@@ -198,9 +198,6 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
             providerName = await config?.getServerConfig('llmProviderChat') as string;
         }
 
-        if (!modelName) {
-            modelName = await config?.getServerConfig('llmModelChat') as string;
-        }
 
         setProviderName(providerName);
 
