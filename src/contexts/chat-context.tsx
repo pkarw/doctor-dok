@@ -98,6 +98,7 @@ export type ChatContextType = {
     sendMessage: (msg: CreateMessageEnvelope) => void;
     sendMessages: (msg: CreateMessagesEnvelope) => void;
     autoCheck: (messages: MessageEx[], providerName: string, modelName: string) => void;
+    aiDirectCall: (messages: MessageEx[], onResult?: OnResultCallback, providerName?: string, modelName?: string) => void;
     chatOpen: boolean,
     setChatOpen: (value: boolean) => void;
     chatCustomPromptVisible: boolean;
@@ -126,6 +127,7 @@ export const ChatContext = createContext<ChatContextType>({
     areRecordsLoaded: false,
     setRecordsLoaded: (value: boolean) => {},
     autoCheck: (messages: MessageEx[], modelName: string) => {},
+    aiDirectCall: (messages: MessageEx[], onResult?: OnResultCallback, providerName?: string, modelName?: string) => {},
     sendMessage: (msg: CreateMessageEnvelope) => {},
     sendMessages: (msg: CreateMessagesEnvelope) => {},
     chatOpen: false,
@@ -475,7 +477,8 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
         lastRequestStat,
         aggregatedStats,
         crossCheckResult,
-        autoCheck
+        autoCheck,
+        aiDirectCall
     }
 
     return (

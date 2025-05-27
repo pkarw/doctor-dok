@@ -32,6 +32,7 @@ import { auditLog } from '@/lib/audit';
 import { diff, addedDiff, deletedDiff, updatedDiff, detailedDiff } from 'deep-object-diff';
 import { AuditContext } from './audit-context';
 import { SaaSContext } from './saas-context';
+import { nanoid } from 'nanoid';
 
 
 let parseQueueInProgress = false;
@@ -65,8 +66,9 @@ export type RecordContextType = {
     setCurrentRecord: (record: Record | null) => void; // new method
     loaderStatus: DataLoadingStatus;
     operationStatus: DataLoadingStatus;
+    setOperationStatus: (status: DataLoadingStatus) => void;
 
-    updateRecordFromText: (text: string, record: Record | null, allowNewRecord: boolean) => Record|null;
+    updateRecordFromText: (text: string, record: Record | null, allowNewRecord: boolean) => Promise<Record|null>;
     getAttachmentData: (attachmentDTO: EncryptedAttachmentDTO, type: AttachmentFormat) => Promise<string|Blob>;
     downloadAttachment: (attachment: EncryptedAttachmentDTO, useCache: boolean) => void;
     convertAttachmentsToImages: (record: Record, statusUpdates: boolean) => Promise<DisplayableDataObject[]>;
@@ -100,8 +102,8 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
     const [recordDialogOpen, setRecordDialogOpen] = useState<boolean>(false);
     const [records, setRecords] = useState<Record[]>([]);
     const [filteredRecords, setFilteredRecords] = useState<Record[]>([]);
-    const [loaderStatus, setLoaderStatus] = useState<DataLoadingStatus>(DataLoadingStatus.Loading);
-    const [operationStatus, setOperationStatus] = useState<DataLoadingStatus>(DataLoadingStatus.Loading);
+    const [loaderStatus, setLoaderStatus] = useState<DataLoadingStatus>(DataLoadingStatus.Idle);
+    const [operationStatus, setOperationStatus] = useState<DataLoadingStatus>(DataLoadingStatus.Idle);
     const [currentRecord, setCurrentRecord] = useState<Record | null>(null); // new state
     const [filterAvailableTags, setFilterAvailableTags] = useState<FilterTag[]>([]);
     const [filterSelectedTags, setFilterSelectedTags] = useState<string[]>([]);
@@ -113,7 +115,11 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
       console.log('Selected tags', filterSelectedTags);
 
       setFilteredRecords(records.filter(record => { // using AND operand (every), if we want to have OR then we should do (some)
-        return record.tags ? filterSelectedTags.every(tag => record.tags && record.tags.includes(tag)) : false;
+        if (!filterSelectedTags || filterSelectedTags.length === 0) {
+          return true;  
+        } else {
+          return record.tags ? filterSelectedTags.every(tag => record.tags && record.tags.includes(tag)) : false;
+        }
       }));
     }, [filterSelectedTags, records]);
 
@@ -165,6 +171,7 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
 
     const updateRecord = async (record: Record): Promise<Record> => {
         try {
+            setOperationStatus(DataLoadingStatus.Loading);
             const client = await setupApiClient(config);
 
             if (record.json && record.json.length > 0) {
@@ -202,7 +209,7 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
             if (response.status !== 200) {
                 console.error('Error adding folder record:', response.message);
                 toast.error('Error adding folder record');
-
+                setOperationStatus(DataLoadingStatus.Error);
                 return record;
             } else {
               const updatedRecord = new Record({ ...record, id: response.data.id } as Record);
@@ -215,16 +222,18 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
                 if (dbContext) auditContext?.record({ eventName: prevRecord ? 'updateRecord' : 'createRecord', encryptedDiff: prevRecord ? JSON.stringify(detailedDiff(prevRecord, updatedRecord)) : '',  recordLocator: JSON.stringify([{ recordIds: [updatedRecord.id]}])});
 
                 //chatContext.setRecordsLoaded(false); // reload context next time - TODO we can reload it but we need time framed throthling #97
+                setOperationStatus(DataLoadingStatus.Success);
                 return updatedRecord;
             }
         } catch (error) {
             console.error('Error adding folder record:', error);
             toast.error('Error adding folder record');
+            setOperationStatus(DataLoadingStatus.Error);
             return record;
         }
     };
 
-    const updateRecordFromText =  (text: string, record: Record | null = null, allowNewRecord = true): Record|null => {
+    const updateRecordFromText =  async (text: string, record: Record | null = null, allowNewRecord = true): Promise<Record|null> => {
         if (text.indexOf('```json') > -1) {
           const codeBlocks = findCodeBlocks(text.trimEnd().endsWith('```') ? text : text + '```', false);
           let recordJSON = [];
@@ -266,10 +275,53 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
               }
               console.log('JSON repr: ', recordJSON);
           } 
-      } else { // create new folder Record
+      } else { // create new folder Record for just plain text
         if (allowNewRecord && folderContext?.currentFolder?.id) { // create new folder Record
-          record = new Record({ folderId: folderContext?.currentFolder?.id, type: 'note', createdAt: getCurrentTS(), updatedAt: getCurrentTS(), json: null, text: text } as Record);
-          updateRecord(record);
+          return  new Promise<Record | null>((resolve) => {
+            chatContext.aiDirectCall([{ role: 'user', content: prompts.generateRecordMetaData({ record: null, config }, text), id: nanoid() }], (result) => {
+              console.log('Meta data: ', result.content);
+              let metaData = {}
+              const codeBlocks = findCodeBlocks(result.content.endsWith('```') ? result.content : result.content + '```', false);
+              if (codeBlocks.blocks.length > 0) {
+                for (const block of codeBlocks.blocks) {
+                    if (block.syntax === 'json') {
+                        const jsonObject = JSON.parse(jsonrepair(block.code));
+                        metaData = jsonObject as RecordDTO;
+                    }
+                }
+              }          
+              
+                        
+              try {
+              const recordDTO: RecordDTO = {
+                folderId: folderContext?.currentFolder?.id as number,
+                type: 'note',
+                createdAt: getCurrentTS(),
+                updatedAt: getCurrentTS(),
+                eventDate: metaData.eventDate || getCurrentTS(),
+                json: JSON.stringify(metaData),
+                text: text,
+                attachments: '[]',
+                checksum: '',
+                checksumLastParsed: '',
+                title: metaData.title || '',
+                description: metaData.summary || '',
+                tags: JSON.stringify(metaData.tags || []),
+                extra: JSON.stringify(metaData.extra || []),
+                transcription: ''
+              };
+              record = Record.fromDTO(recordDTO);
+              updateRecord(record);
+              resolve(record);
+            } catch (error) {
+              toast.error('Error creating record from text.');
+              setOperationStatus(DataLoadingStatus.Error);
+              resolve(null);
+            }
+  
+            }, 'chatgpt', 'gpt-4o'); // using small model for summary
+
+          });
         }
       }
       return record;
@@ -744,6 +796,7 @@ export const RecordContextProvider: React.FC<PropsWithChildren> = ({ children })
                  updateRecord, 
                  loaderStatus, 
                  operationStatus,
+                 setOperationStatus,
                  setCurrentRecord, 
                  currentRecord, 
                  listRecords, 
