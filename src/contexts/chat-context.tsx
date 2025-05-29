@@ -351,7 +351,8 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
             const result = await streamText({
                 model: await aiProvider(providerName, modelName),
                 messages: convertToCoreMessages(messagesToSend),
-                maxTokens: process.env.NEXT_PUBLIC_MAX_OUTPUT_TOKENS ? parseInt(process.env.NEXT_PUBLIC_MAX_OUTPUT_TOKENS) : 4096 * 2,
+                temperature: process.env.NEXT_PUBLIC_CHAT_TEMPERATURE && modelName !== 'o1' ? parseFloat(process.env.NEXT_PUBLIC_CHAT_TEMPERATURE) : 1.0,
+//                maxTokens: process.env.NEXT_PUBLIC_MAX_OUTPUT_TOKENS ? parseInt(process.env.NEXT_PUBLIC_MAX_OUTPUT_TOKENS) : 4096 * 2, - there's a config discrepancy with o3
                 onFinish: async (e) =>  {
                     resultMessage.finished = true;
                     setIsCrossChecking(false);
@@ -515,7 +516,8 @@ export const ChatContextProvider: React.FC<PropsWithChildren> = ({ children }) =
             const result = await streamText({
                 model: await aiProvider(providerName, modelName),
                 messages: convertToCoreMessages(messagesToSend),
-                maxTokens: process.env.NEXT_PUBLIC_MAX_OUTPUT_TOKENS ? parseInt(process.env.NEXT_PUBLIC_MAX_OUTPUT_TOKENS) : 4096 * 2,
+                temperature: process.env.NEXT_PUBLIC_CHAT_TEMPERATURE && modelName !== 'o1' ? parseFloat(process.env.NEXT_PUBLIC_CHAT_TEMPERATURE) : 1.0,
+                //maxTokens: process.env.NEXT_PUBLIC_MAX_OUTPUT_TOKENS ? parseInt(process.env.NEXT_PUBLIC_MAX_OUTPUT_TOKENS) : 4096 * 2, - there's a config discrepancy with o3
                 onFinish: async (e) =>  {
                     try {
                         await aggregateStats({
