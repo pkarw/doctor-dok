@@ -165,7 +165,12 @@ export function Chat() {
             <DropdownMenuItem onSelect={(e) => {
                 setLlmProvider('chatgpt');
                 setLlmModel('chatgpt-4o-latest');
-              }}> { llmModel === 'chatgpt-4o-latest' || llmModel === '' ? <CheckIcon className="mr-2" /> : null } Chat with ChatGPT</DropdownMenuItem>
+              }}> { llmModel === 'chatgpt-4o-latest' || llmModel === '' ? <CheckIcon className="mr-2" /> : null } Chat with ChatGPT 4o</DropdownMenuItem>
+
+<DropdownMenuItem onSelect={(e) => {
+                setLlmProvider('chatgpt');
+                setLlmModel('o1');
+              }}> { llmModel === 'o1' ? <CheckIcon className="mr-2" /> : null } Chat with ChatGPT o1</DropdownMenuItem>
 
                 <DropdownMenuItem onSelect={(e) => {
                   setLlmProvider('gemini');
