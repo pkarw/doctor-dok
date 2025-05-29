@@ -78,7 +78,7 @@ export const prompts = {
         \r\n' + JSON.stringify(context.record?.json) + '```'
     },
     recordIntoChatSimplified: (context: PromptContext) => {
-        return 'Structured health record (RecordId: ' + context.record?.id + ', date: ' + context.record?.eventDate + ') in JSON:  \r\n\r\n```json\
+        return 'Structured health record (Record Id: ' + context.record?.id + ', date: ' + context.record?.eventDate + ') in JSON:  \r\n\r\n```json\
         \r\n' + JSON.stringify(context.record?.json) + '```'
     },
     translateRecord: (context: PromptContext & { language: string}) => {
@@ -105,7 +105,7 @@ export const prompts = {
         \r\n' + JSON.stringify(context.record?.json) + '```'
     },
     safetyMessage: (context: PromptContext) => {
-        return 'Add information sources and links. Avoid diagnosis and any potentially dangerous recommendations. Do not add any custom interpretations over medical terms. Try to base on exact medical terms used in the medical records and always base on factual data from the context. Providing any facts from the records history always ADD REFERENCE IN BRACKETS to the medical records from the context (for example RecordId: 7, referencing this record)'
+        return 'Add information sources and links. Avoid diagnosis and any potentially dangerous recommendations. Do not add any custom interpretations over medical terms. Try to base on exact medical terms used in the medical records and always base on factual data from the context. Providing any facts from the records history always ADD REFERENCE IN BRACKETS to the medical records from the context (for example Record Id: 7, referencing this record)'
     },
     autoCheck: (context: PromptContext) => {
         return 'Check the if last message is correct and valid regarding the medical knowledge and the context included within the conversaion. Score: Green, Yellow or Red the message risk and validity. If needed return the next question I should ask to fix the answer or get deeper. Add the explanation including your own answer and safe recommendations (include sources). Return ONLY JSON for example: { "risk": "green", "validity": "green", "answer": "For Asthma you should contact your physician. Ibuprofen is not the right answer", "explanation": "Ibuprofen is not valid for treating asthma", nextQuestion: "What is the recommended treatment for asthma?" }'
